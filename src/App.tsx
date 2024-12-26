@@ -1,18 +1,35 @@
 import "./App.css";
 import { ref, set } from "firebase/database";
 import { database } from "./firebase";
+import { Joystick } from "react-joystick-component";
+import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
 
 function App() {
-  const move = (dir: string) => {
+  const move = (dir: string, joystick?: IJoystickUpdateEvent) => {
     console.log("adding todo");
     const newTodoRef = ref(database, "players/p1");
     set(newTodoRef, {
       dir: dir,
+      joystick: joystick,
     });
   };
 
   return (
     <>
+      <Joystick
+        size={100}
+        sticky={false}
+        baseColor="red"
+        stickColor="blue"
+        move={(e) => {
+          move("null", e);
+          console.log("moved :: ", e);
+        }}
+        stop={(e) => {
+          console.log("stopped :: ", e);
+          move("null", e);
+        }}
+      ></Joystick>
       <button
         type="button"
         onMouseDown={() => move("up")}
