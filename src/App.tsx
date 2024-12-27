@@ -30,11 +30,10 @@ function App() {
     });
   }, []);
 
-  const move = (dir: string, joystick?: IJoystickUpdateEvent) => {
+  const move = (joystick?: IJoystickUpdateEvent) => {
     console.log("adding todo");
     const dbRef = ref(database, "players/" + user?.uid);
     set(dbRef, {
-      dir: dir,
       joystick: joystick,
     });
   };
@@ -48,12 +47,12 @@ function App() {
         baseColor="red"
         stickColor="blue"
         move={(e) => {
-          move("null", e);
+          move(e);
           console.log("moved :: ", e);
         }}
         stop={(e) => {
           console.log("stopped :: ", e);
-          move("null", e);
+          move(e);
         }}
       ></Joystick>
     </>
