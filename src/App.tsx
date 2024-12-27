@@ -1,5 +1,11 @@
 import "./App.css";
-import { ref, set } from "firebase/database";
+import {
+  DatabaseReference,
+  onValue,
+  ref,
+  set,
+  update,
+} from "firebase/database";
 import { auth, database } from "./firebase";
 import { Joystick } from "react-joystick-component";
 import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
@@ -8,20 +14,28 @@ import { onAuthStateChanged, signInAnonymously, User } from "firebase/auth";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
+  const [dbRef, setDbRef] = useState<DatabaseReference | null>();
   const [movement, setMovement] = useState<IJoystickUpdateEvent | null>(null);
   const [btn1, setBtn1] = useState<boolean>(false);
   const [btn2, setBtn2] = useState<boolean>(false);
   const [btn3, setBtn3] = useState<boolean>(false);
   const [btn4, setBtn4] = useState<boolean>(false);
+
+  const [score, setScore] = useState<number>(0);
+
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log(user);
         setUser(user);
+        setDbRef(ref(database, "players/" + user.uid));
+        scoreSystem(user.uid);
       } else {
         signInAnonymously(auth)
           .then((userCredential) => {
             setUser(userCredential.user);
+            setDbRef(ref(database, "players/" + userCredential.user.uid));
+            scoreSystem(userCredential.user.uid);
           })
           .catch((error) => {
             // Handle Errors here.
@@ -42,8 +56,7 @@ function App() {
   }, [movement, btn1, btn2, btn3, btn4]);
 
   const uploadData = () => {
-    const dbRef = ref(database, "players/" + user?.uid);
-    set(dbRef, {
+    update(dbRef!, {
       joystick: movement,
       btn1: btn1,
       btn2: btn2,
@@ -52,8 +65,18 @@ function App() {
     });
   };
 
+  const scoreSystem = (userId: string) => {
+    onValue(ref(database, "players/" + userId + "/score"), (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setScore(data.score);
+      }
+    });
+  };
+
   return (
     <div className="mainContainer">
+      <p>SCORE: {score}</p>
       <p>UID: {user?.uid}</p>
       <div className="contollers">
         <Joystick

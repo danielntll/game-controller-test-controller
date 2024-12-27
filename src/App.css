@@ -1,6 +1,6 @@
 #root {
   margin: 0 auto;
-  padding: 2rem;
+  width: 90vw;
   text-align: center;
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10+ and Edge */
@@ -60,7 +60,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  width: 49%;
+  width: 200px;
 }
 .top {
   width: 100%;
