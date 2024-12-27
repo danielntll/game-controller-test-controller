@@ -1,11 +1,5 @@
 import "./App.css";
-import {
-  DatabaseReference,
-  onValue,
-  ref,
-  set,
-  update,
-} from "firebase/database";
+import { DatabaseReference, onValue, ref, update } from "firebase/database";
 import { auth, database } from "./firebase";
 import { Joystick } from "react-joystick-component";
 import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
