@@ -1,14 +1,39 @@
 import "./App.css";
 import { ref, set } from "firebase/database";
-import { database } from "./firebase";
+import { auth, database } from "./firebase";
 import { Joystick } from "react-joystick-component";
 import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged, signInAnonymously, User } from "firebase/auth";
 
 function App() {
+  const [user, setUser] = useState<User | null>(null);
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log(user);
+        setUser(user);
+      } else {
+        signInAnonymously(auth)
+          .then((userCredential) => {
+            setUser(userCredential.user);
+          })
+          .catch((error) => {
+            // Handle Errors here.
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error(
+              `Error during anonymous sign-in: ${errorCode}, ${errorMessage}`
+            );
+          });
+      }
+    });
+  }, []);
+
   const move = (dir: string, joystick?: IJoystickUpdateEvent) => {
     console.log("adding todo");
-    const newTodoRef = ref(database, "players/p1");
-    set(newTodoRef, {
+    const dbRef = ref(database, "players/" + user?.uid);
+    set(dbRef, {
       dir: dir,
       joystick: joystick,
     });
@@ -16,6 +41,7 @@ function App() {
 
   return (
     <>
+      <p>UID: {user?.uid}</p>
       <Joystick
         size={100}
         sticky={false}
@@ -30,45 +56,6 @@ function App() {
           move("null", e);
         }}
       ></Joystick>
-      <button
-        type="button"
-        onMouseDown={() => move("up")}
-        onMouseUp={() => move("null")}
-        onTouchStart={() => move("up")}
-        onTouchEnd={() => move("null")}
-      >
-        up
-      </button>
-
-      <button
-        type="button"
-        onMouseDown={() => move("down")}
-        onMouseUp={() => move("null")}
-        onTouchStart={() => move("down")}
-        onTouchEnd={() => move("null")}
-      >
-        down
-      </button>
-
-      <button
-        type="button"
-        onMouseDown={() => move("left")}
-        onMouseUp={() => move("null")}
-        onTouchStart={() => move("left")}
-        onTouchEnd={() => move("null")}
-      >
-        left
-      </button>
-
-      <button
-        type="button"
-        onMouseDown={() => move("right")}
-        onMouseUp={() => move("null")}
-        onTouchStart={() => move("right")}
-        onTouchEnd={() => move("null")}
-      >
-        right
-      </button>
     </>
   );
 }
